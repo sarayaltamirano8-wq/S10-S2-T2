@@ -34,6 +34,55 @@ document.getElementById('btnGuardar').onclick = async function() {
     }
 };
 
+async function eliminar(id) {
+    if (confirm("¿Estás seguro de eliminar este producto?")) {
+        try {
+            const res = await fetch(`${URL_API}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                alert("Producto eliminado correctamente");
+                cargarTabla();
+            } else {
+                alert("Error al eliminar el producto");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("No se pudo conectar con el servidor");
+        }
+    }
+}
+
+async function editar(id) {
+
+    const nuevoNombre = prompt("Nuevo nombre del producto:");
+    const nuevoPrecio = prompt("Nuevo precio:");
+    const nuevoStock = prompt("Nuevo stock:");
+
+    if (!nuevoNombre || !nuevoPrecio || !nuevoStock) return;
+
+    const datosEditados = {
+        nombre: nuevoNombre,
+        precio: parseFloat(nuevoPrecio),
+        stock: parseInt(nuevoStock)
+    };
+
+    try {
+        const res = await fetch(`${URL_API}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosEditados)
+        });
+
+        if (res.ok) {
+            alert("Producto actualizado correctamente");
+            cargarTabla();
+        }
+    } catch (error) {
+        alert("Error al intentar editar");
+    }
+}
 
 async function cargarTabla() {
     try {
@@ -47,10 +96,15 @@ async function cargarTabla() {
                 <tr>
                     <td>${p.id}</td>
                     <td>${p.nombre}</td>
-                    <td>${p.precio}</td>
+                    <td>${p.precio.toFixed(2)}</td>
                     <td>${p.stock}</td>
                     <td>
-                        <button onclick="eliminar(${p.id})">Eliminar</button>
+                        <button class="btn-edit" onclick="editar(${p.id}, '${p.nombre}', ${p.precio}, ${p.stock})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-delete" onclick="eliminar(${p.id})">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
                     </td>
                 </tr>
             `;
